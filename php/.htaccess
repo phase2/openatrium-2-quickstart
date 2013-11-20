@@ -137,3 +137,8 @@ DirectoryIndex index.php index.html index.htm
     </FilesMatch>
   </IfModule>
 </IfModule>
+
+# OpenShift customizations.
+<IfModule mod_php5.c>
+  php_value memory_limit 196M
+</IfModule>
