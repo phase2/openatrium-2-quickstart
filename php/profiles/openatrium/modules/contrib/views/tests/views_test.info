@@ -1,0 +1,14 @@
+name = Views Test
+description = Test module for Views.
+package = Views
+core = 7.x
+dependencies[] = views
+hidden = TRUE
+
+
+; Information added by drush on 2013-11-20
+version = "7.x-3.7+14-dev"
+core = "7.x"
+project = "views"
+datestamp = "1384919116"
+
