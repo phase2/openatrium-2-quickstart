@@ -1,0 +1,32 @@
+name        = Radix
+description = A Drupal theme with Bootstrap and SASS
+screenshot  = screenshot.png
+core        = 7.x
+
+; CSS - General
+stylesheets[all][]     = assets/stylesheets/radix-style.css
+stylesheets[print][]   = assets/stylesheets/radix-print.css
+
+; CSS - Conditional
+stylesheets-conditional[IE 7][all][] = assets/stylesheets/radix-ie7.css
+stylesheets-conditional[IE 8][all][] = assets/stylesheets/radix-ie8.css
+
+; Javascript
+scripts[] = assets/javascripts/modernizr-2.6.1.min.js
+scripts[] = assets/javascripts/radix-script.js
+
+; Regions
+regions[content] = Content
+
+; Features
+features[] = logo
+features[] = name
+features[] = favicon
+
+
+; Information added by drush on 2013-11-20
+version = "7.x-2.0-beta5+7-dev"
+core = "7.x"
+project = "radix"
+datestamp = "1384919096"
+

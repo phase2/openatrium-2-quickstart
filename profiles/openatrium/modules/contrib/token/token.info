@@ -1,0 +1,12 @@
+name = Token
+description = Provides a user interface for the Token API and some missing core tokens.
+core = 7.x
+files[] = token.test
+
+
+; Information added by drush on 2013-11-20
+version = "7.x-1.5+0-dev"
+core = "7.x"
+project = "token"
+datestamp = "1384919114"
+

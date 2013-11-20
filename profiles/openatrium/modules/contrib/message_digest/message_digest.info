@@ -1,0 +1,15 @@
+name = Message Digest
+description = Daily or weekly digest emails for the Message module
+core = 7.x
+package = Message
+dependencies[] = message_notify
+
+files[] = plugins/notifier/abstract.inc
+;files[] = message_digest.test
+
+; Information added by  packaging script on 2013-11-15
+version = "7.x-1.0-beta4"
+core = "7.x"
+project = "message_digest"
+datestamp = "1384533206"
+
