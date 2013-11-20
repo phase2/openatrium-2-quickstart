@@ -1,0 +1,16 @@
+#!/bin/bash
+# This is a simple build script and will be executed on your CI system if 
+# available.  Otherwise it will execute while your application is stopped
+# before the deploy step.  This script gets executed directly, so it
+# could be python, php, ruby, etc. 
+
+set -e
+
+# Drush settings. Ensure that .drush exists (in case we're on Origin Release 2 or earlier.)
+mkdir -p "${OPENSHIFT_HOMEDIR}/.drush"
+cat >"${OPENSHIFT_HOMEDIR}/.drush/drushrc.php" <<EOF
+<?php
+  \$options['uri'] = \$_ENV['OPENSHIFT_APP_DNS'];
+  \$options['root'] = \$_ENV['OPENSHIFT_REPO_DIR'].'php';
+EOF
+
