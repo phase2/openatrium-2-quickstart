@@ -741,20 +741,27 @@ function drupal_install_system() {
 }
 
 /**
- * Uninstalls a given list of modules.
+ * Uninstalls a given list of disabled modules.
  *
- * @param $module_list
- *   The modules to uninstall.
- * @param $uninstall_dependents
- *   If TRUE, the function will check that all modules which depend on the
- *   passed-in module list either are already uninstalled or contained in the
- *   list, and it will ensure that the modules are uninstalled in the correct
- *   order. This incurs a significant performance cost, so use FALSE if you
- *   know $module_list is already complete and in the correct order.
+ * @param array $module_list
+ *   The modules to uninstall. It is the caller's responsibility to ensure that
+ *   all modules in this list have already been disabled before this function
+ *   is called.
+ * @param bool $uninstall_dependents
+ *   (optional) If TRUE, the function will check that all modules which depend
+ *   on the passed-in module list either are already uninstalled or contained in
+ *   the list, and it will ensure that the modules are uninstalled in the
+ *   correct order. This incurs a significant performance cost, so use FALSE if
+ *   you know $module_list is already complete and in the correct order.
+ *   Defaults to TRUE.
  *
- * @return
- *   FALSE if one or more dependent modules are missing from the list, TRUE
- *   otherwise.
+ * @return bool
+ *   Returns TRUE if the operation succeeds or FALSE if it aborts due to an
+ *   unsafe condition, namely, $uninstall_dependents is TRUE and a module in
+ *   $module_list has dependents which are not already uninstalled and not also
+ *   included in $module_list).
+ *
+ * @see module_disable()
  */
 function drupal_uninstall_modules($module_list = array(), $uninstall_dependents = TRUE) {
   if ($uninstall_dependents) {
@@ -766,7 +773,7 @@ function drupal_uninstall_modules($module_list = array(), $uninstall_dependents 
     $profile = drupal_get_profile();
     while (list($module) = each($module_list)) {
       if (!isset($module_data[$module]) || drupal_get_installed_schema_version($module) == SCHEMA_UNINSTALLED) {
-        // This module doesn't exist or is already uninstalled, skip it.
+        // This module doesn't exist or is already uninstalled. Skip it.
         unset($module_list[$module]);
         continue;
       }
@@ -799,7 +806,7 @@ function drupal_uninstall_modules($module_list = array(), $uninstall_dependents 
   }
 
   if (!empty($module_list)) {
-    // Call hook_module_uninstall to let other modules act
+    // Let other modules react.
     module_invoke_all('modules_uninstalled', $module_list);
   }
 
@@ -1127,7 +1134,6 @@ function st($string, array $args = array(), array $options = array()) {
     }
   }
 
-  require_once DRUPAL_ROOT . '/includes/theme.inc';
   // Transform arguments before inserting them
   foreach ($args as $key => $value) {
     switch ($key[0]) {
@@ -1272,6 +1278,7 @@ function drupal_check_module($module) {
  *   The info array.
  */
 function install_profile_info($profile, $locale = 'en') {
+  include_once DRUPAL_ROOT . '/includes/module.inc';
   $cache = &drupal_static(__FUNCTION__, array());
 
   if (!isset($cache[$profile])) {
@@ -1285,19 +1292,67 @@ function install_profile_info($profile, $locale = 'en') {
       'php' => DRUPAL_MINIMUM_PHP,
     );
     $info = drupal_parse_info_file("profiles/$profile/$profile.info") + $defaults;
-    $info['dependencies'] = array_unique(array_merge(
-      drupal_required_modules(),
-      $info['dependencies'],
-      ($locale != 'en' && !empty($locale) ? array('locale') : array()))
-    );
-
+    if ($locale != 'en' && !empty($locale) && !in_array('locale', $info['dependencies'])) {
+      $info['dependencies'][] = 'locale';
+    }
+    $info['dependencies'] = module_build_dependencies($info['dependencies']);
+    $required_modules = drupal_required_modules();
     // drupal_required_modules() includes the current profile as a dependency.
     // Since a module can't depend on itself we remove that element of the array.
-    array_shift($info['dependencies']);
+    array_shift($required_modules);
+    $info['dependencies'] = array_unique(array_merge($required_modules, $info['dependencies']));
 
     $cache[$profile] = $info;
   }
   return $cache[$profile];
+}
+
+/**
+ * Given a list of modules, resorts and adds depedencies.
+ *
+ * @param $module_list
+ *   An array of module names.
+ * @param $include_enabled
+ *   Include enabled modules.
+ *
+ * @return
+ *   An array of modules with their depedencies, in install order.
+ *
+ * @see module_enable()
+ */
+function module_build_dependencies($module_list, $include_enabled = TRUE) {
+  if (defined('MAINTENANCE_MODE') && MAINTENANCE_MODE == 'install') {
+    $module_data = _module_build_dependencies(_system_rebuild_module_data());
+  }
+  else {
+    $module_data = system_rebuild_module_data();
+  }
+
+  // Create an associative array with weights as values.
+  $module_list = array_flip(array_values($module_list));
+
+  while (list($module) = each($module_list)) {
+    if (!isset($module_data[$module])) {
+      // This module is not found in the filesystem.
+      continue;
+    }
+    if (!$include_enabled && $module_data[$module]->status) {
+      // Skip already enabled modules.
+      unset($module_list[$module]);
+      continue;
+    }
+    $module_list[$module] = $module_data[$module]->sort;
+
+    // Add dependencies to the list, with a placeholder weight.
+    // The new modules will be processed as the while loop continues.
+    foreach (array_keys($module_data[$module]->requires) as $dependency) {
+      if (!isset($module_list[$dependency])) {
+        $module_list[$dependency] = 0;
+      }
+    }
+  }
+  arsort($module_list);
+  return array_keys($module_list);
 }
 
 /**
