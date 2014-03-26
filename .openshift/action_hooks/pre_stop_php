@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Try making the sites dir writeable for git's benefit.
+DRUPAL_SITES_DIR="${OPENSHIFT_REPO_DIR}php/sites"
+for site in `find ${OPENSHIFT_REPO_DIR}php/sites -maxdepth 1 -mindepth 1 -type d -not -iname all`; do
+  chmod ugo+w $site || /bin/true
+  chmod ugo+w $site/settings.php || /bin/true
+done
+
