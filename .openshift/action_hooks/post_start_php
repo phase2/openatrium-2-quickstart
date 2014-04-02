@@ -7,11 +7,3 @@ mkdir -p $FILES_DIR
 
 rm -fr $DRUPAL_FILES_DIR
 ln -sfv $FILES_DIR $DRUPAL_FILES_DIR
-
-# Don't make sites/default or sites/default/settings.php writeable after deploy.
-DRUPAL_SITES_DIR="${OPENSHIFT_REPO_DIR}php/sites"
-for site in `find ${OPENSHIFT_REPO_DIR}php/sites -maxdepth 1 -mindepth 1 -type d -not -iname all`; do
-  chmod ugo-w $site || /bin/true
-  chmod ugo-w $site/settings.php || /bin/true
-done
-

@@ -2,3 +2,5 @@
 # This is a simple post deploy hook executed after your application 
 # is deployed and started.  This script gets executed directly, so 
 # it could be python, php, ruby, etc.
+
+[[ $OPENSHIFT_MYSQL_IDENT == *5.5* ]] && mysql -h$OPENSHIFT_MYSQL_DB_HOST -u$OPENSHIFT_MYSQL_DB_USERNAME -p$OPENSHIFT_MYSQL_DB_PASSWORD -e"SET GLOBAL innodb_file_per_table = On;"
