@@ -100,61 +100,40 @@ projects[google_analytics][subdir] = contrib
 
 ; Someday maybe we can turn this on to just inherit Panopoly
 ;projects[panopoly][type] = profile
-;projects[panopoly][version] = 1.0-rc5
+;projects[panopoly][version] = 1.5
 ; but, Drupal.org does not support recursive profiles
 ; and also does not support include[]
 ; so we need to copy the panopoly.make file here
 
-projects[panopoly_core][version] = 1.x-dev
+projects[panopoly_core][version] = 1.6
 projects[panopoly_core][subdir] = panopoly
-projects[panopoly_core][download][type] = git
-projects[panopoly_core][download][branch] = 7.x-1.x
-projects[panopoly_core][download][revision] = fe9fc2
 
-projects[panopoly_images][version] = 1.1
+projects[panopoly_images][version] = 1.6
 projects[panopoly_images][subdir] = panopoly
 
-projects[panopoly_theme][version] = 1.x-dev
+projects[panopoly_theme][version] = 1.6
 projects[panopoly_theme][subdir] = panopoly
-projects[panopoly_theme][download][type] = git
-projects[panopoly_theme][download][branch] = 7.x-1.x
-projects[panopoly_theme][download][revision] = d409de
 
-projects[panopoly_magic][version] = 1.1
+projects[panopoly_magic][version] = 1.6
 projects[panopoly_magic][subdir] = panopoly
 
-projects[panopoly_widgets][version] = 1.1
+projects[panopoly_widgets][version] = 1.6
 projects[panopoly_widgets][subdir] = panopoly
 
-projects[panopoly_admin][version] = 1.x-dev
+projects[panopoly_admin][version] = 1.6
 projects[panopoly_admin][subdir] = panopoly
-projects[panopoly_admin][download][type] = git
-projects[panopoly_admin][download][branch] = 7.x-1.x
-projects[panopoly_admin][download][revision] = daaf69
 
-projects[panopoly_users][version] = 1.x-dev
+projects[panopoly_users][version] = 1.6
 projects[panopoly_users][subdir] = panopoly
-projects[panopoly_users][download][type] = git
-projects[panopoly_users][download][branch] = 7.x-1.x
-projects[panopoly_users][download][revision] = aa8e72
 
-projects[panopoly_pages][version] = 1.x-dev
+projects[panopoly_pages][version] = 1.6
 projects[panopoly_pages][subdir] = panopoly
-projects[panopoly_pages][download][type] = git
-projects[panopoly_pages][download][branch] = 7.x-1.x
-projects[panopoly_pages][download][revision] = d45361
 
-projects[panopoly_wysiwyg][version] = 1.x-dev
+projects[panopoly_wysiwyg][version] = 1.6
 projects[panopoly_wysiwyg][subdir] = panopoly
-projects[panopoly_wysiwyg][download][type] = git
-projects[panopoly_wysiwyg][download][branch] = 7.x-1.x
-projects[panopoly_wysiwyg][download][revision] = 7f1f37
 
-projects[panopoly_search][version] = 1.x-dev
+projects[panopoly_search][version] = 1.6
 projects[panopoly_search][subdir] = panopoly
-projects[panopoly_search][download][type] = git
-projects[panopoly_search][download][branch] = 7.x-1.x
-projects[panopoly_search][download][revision] = f7e1fa
 
 ; ***************** End Panopoly *****************
 ; ************************************************
