@@ -80,7 +80,7 @@ function oa_events_field_default_field_instances() {
     'default_value' => NULL,
     'deleted' => 0,
     'description' => 'Location Address and/or link, i.e.,
-1600 Pennsylvania Avenue, NW 
+1600 Pennsylvania Avenue, NW
 Washington, DC 20500
 http://www.whitehouse.gov/',
     'display' => array(
@@ -317,7 +317,7 @@ http://www.whitehouse.gov/',
     'settings' => array(
       'description_field' => 0,
       'file_directory' => '',
-      'file_extensions' => 'jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp mp3 mov mp4 m4a m4v mpeg avi ogg oga ogv wmv ico',
+      'file_extensions' => 'jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp mp3 mov mp4 m4a m4v mpeg avi ogg oga ogv weba webp webm',
       'max_filesize' => '',
       'user_register_form' => FALSE,
     ),
@@ -348,6 +348,74 @@ http://www.whitehouse.gov/',
       ),
       'type' => 'media_generic',
       'weight' => 4,
+    ),
+  );
+
+  // Exported field_instance: 'node-oa_event-oa_other_spaces_ref'
+  $field_instances['node-oa_event-oa_other_spaces_ref'] = array(
+    'bundle' => 'oa_event',
+    'comment_alter' => 0,
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => 'Select a list of additional Spaces that this piece of content should be visible in. This <em>doesn\'t</em> affect access control - users in the other Spaces must have access to see this content in it\'s main Space for it to be visible to them at all.',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'entityreference',
+        'settings' => array(
+          'link' => FALSE,
+        ),
+        'type' => 'entityreference_label',
+        'weight' => 8,
+      ),
+      'featured' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'ical' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'oa_other_spaces_ref',
+    'label' => 'Visible in other Spaces',
+    'options_limit' => 0,
+    'options_limit_empty_behaviour' => 0,
+    'options_limit_fields' => array(
+      'body' => 0,
+    ),
+    'required' => 0,
+    'settings' => array(
+      'behaviors' => array(
+        'og_widget' => array(
+          'admin' => array(
+            'widget_type' => 'entityreference_autocomplete',
+          ),
+          'default' => array(
+            'widget_type' => 'options_select',
+          ),
+          'status' => TRUE,
+        ),
+      ),
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'og',
+      'settings' => array(),
+      'type' => 'og_complex',
+      'weight' => 5,
     ),
   );
 
@@ -571,11 +639,13 @@ http://www.whitehouse.gov/',
   t('Groups audience');
   t('Location');
   t('Location Address and/or link, i.e.,
-1600 Pennsylvania Avenue, NW 
+1600 Pennsylvania Avenue, NW
 Washington, DC 20500
 http://www.whitehouse.gov/');
   t('OG vocabulary');
   t('Open Atrium Section');
+  t('Select a list of additional Spaces that this piece of content should be visible in. This <em>doesn\'t</em> affect access control - users in the other Spaces must have access to see this content in it\'s main Space for it to be visible to them at all.');
+  t('Visible in other Spaces');
 
   return $field_instances;
 }

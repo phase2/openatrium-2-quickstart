@@ -56,9 +56,12 @@ function oa_core_user_spaces_render($subtype, $conf, $args, $context = NULL) {
   $active_spaces_nodes = node_load_multiple($active_spaces_ids);
   $active_spaces = oa_core_build_space_display($active_spaces_nodes, $conf, $account, $group_types);
 
-  $spaces = oa_favorites_get_spaces($account);
-  $featured_spaces_nodes = node_load_multiple($spaces['ids']);
-  $featured_spaces = oa_core_build_space_display($featured_spaces_nodes, $conf, $account, $group_types);
+  $featured_spaces = array();
+  if (module_exists('oa_favorites')) {
+    $spaces = oa_favorites_get_spaces($account);
+    $featured_spaces_nodes = node_load_multiple($spaces['ids']);
+    $featured_spaces = oa_core_build_space_display($featured_spaces_nodes, $conf, $account, $group_types);
+  }
 
   $page = 0;
   // set our maximum item per page
@@ -194,6 +197,8 @@ function oa_core_user_spaces_get_links($space, $conf, $account) {
  * but that was hardcoded to use the logged-in user
  */
 function oa_core_user_spaces_og_links($entity, $account) {
+  global $user;
+
   $entity_type = 'node';
   $settings = array('field_name' => 'og_user_node');
   $uid = $account->uid;
@@ -212,7 +217,12 @@ function oa_core_user_spaces_og_links($entity, $account) {
   if (og_is_member($entity_type, $id, 'user', $account, array(OG_STATE_ACTIVE, OG_STATE_PENDING))) {
     if (og_user_access($entity_type, $id, 'unsubscribe', $account)) {
       $links['title'] = t('Unsubscribe from group');
-      $links['href'] = "group/$entity_type/$id/remove/$uid";
+      if ($user->uid == $uid) {
+        $links['href'] = "group/$entity_type/$id/unsubscribe";
+      }
+      else {
+        $links['href'] = "group/$entity_type/$id/remove/single/$uid";
+      }
       $links['options'] = array('query' => array('destination' => current_path()));
     }
   }

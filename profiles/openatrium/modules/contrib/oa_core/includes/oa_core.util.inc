@@ -40,6 +40,10 @@ function oa_core_get_groups_by_user($account = NULL, $group_type = NULL) {
  * @return int Space ID
  */
 function oa_core_get_space_context($from_session = FALSE) {
+  if (variable_get('install_task') !== 'done') {
+    // don't run this during the installer
+    return 0;
+  }
   if ($from_session && defined('OG_SESSION_CONTEXT_ID') && isset($_SESSION[OG_SESSION_CONTEXT_ID])) {
     return $_SESSION[OG_SESSION_CONTEXT_ID];
   }
@@ -59,6 +63,10 @@ function oa_core_get_space_context($from_session = FALSE) {
  * @return int Space ID
  */
 function oa_core_get_space_home_context() {
+  if (variable_get('install_task') !== 'done') {
+    // don't run this during the installer
+    return 0;
+  }
   $space_id = oa_core_get_space_context();
   $node = menu_get_object();
   if (drupal_is_front_page() && !(isset($node) && ($node->type == OA_SPACE_TYPE))) {
@@ -86,12 +94,15 @@ function oa_core_get_section_context() {
  * @param  string $bundle node type
  * @return array of parent nids
  */
-function oa_core_get_parents($nid, $bundle = OA_SPACE_TYPE) {
+function oa_core_get_parents($nid, $bundle = OA_SPACE_TYPE, $status = NULL) {
   $cache = &drupal_static(__FUNCTION__);
 
   if (!isset($cache[$nid][$bundle])) {
     $query = db_select('node', 'n');
     $query->leftJoin('og_membership', 'f', "n.nid = f.gid");
+    if (isset($status)) {
+      $query->condition('n.status', $status);
+    }
     $result = $query
       ->fields('n', array('nid'))
       ->condition('f.etid', $nid)
@@ -112,7 +123,7 @@ function oa_core_get_parents($nid, $bundle = OA_SPACE_TYPE) {
  * @param  string $bundle node type
  * @return array of children nids
  */
-function oa_core_get_groups_by_parent($nid, $bundle = OA_SPACE_TYPE) {
+function oa_core_get_groups_by_parent($nid, $bundle = OA_SPACE_TYPE, $status = NULL) {
   $cache = &drupal_static(__FUNCTION__);
 
   if (!isset($cache[$nid][$bundle])) {
@@ -122,6 +133,9 @@ function oa_core_get_groups_by_parent($nid, $bundle = OA_SPACE_TYPE) {
       $query->leftJoin('og_membership', 'f', "n.nid = f.etid");
       if (isset($bundle)) {
         $query->condition('n.type', $bundle);
+      }
+      if (isset($status)) {
+        $query->condition('n.status', $status);
       }
       $result = $query
         ->fields('n', array('nid'))
@@ -136,6 +150,9 @@ function oa_core_get_groups_by_parent($nid, $bundle = OA_SPACE_TYPE) {
       $query->leftJoin('og_membership', 'f', "n.nid = f.etid");
       if (isset($bundle)) {
         $query->condition('n.type', $bundle);
+      }
+      if (isset($status)) {
+        $query->condition('n.status', $status);
       }
       $result = $query
         ->fields('n', array('nid'))
@@ -344,14 +361,18 @@ function oa_core_truncate_list($list, $count, $more_link = '', $always_link = FA
  * @return array
  * An array of public gids
  */
-function oa_core_get_public_spaces($group_types = array(OA_SPACE_TYPE => OA_SPACE_TYPE)) {
+function oa_core_get_public_spaces($group_types = array(OA_SPACE_TYPE => OA_SPACE_TYPE), $status = NULL) {
   $public_spaces = &drupal_static(__FUNCTION__);
   if (!isset($public_spaces)) {
-    $query = db_select('field_data_group_access', 'g')
-      ->fields('g', array('entity_id'))
-      ->condition('bundle', $group_types, 'IN')
-      ->condition('entity_type', 'node')
-      ->condition('group_access_value', 0);
+    $query = db_select('node', 'n');
+    $query->rightJoin('field_data_group_access', 'g', "n.nid = g.entity_id AND g.entity_type = 'node'");
+    $query
+      ->fields('n', array('nid'))
+      ->condition('n.type', $group_types, 'IN')
+      ->condition('g.group_access_value', 0);
+    if (isset($status)) {
+      $query->condition('n.status', $status);
+    }
     $public_spaces = $query->execute()->fetchCol(0);
   }
   return $public_spaces;
@@ -363,19 +384,24 @@ function oa_core_get_public_spaces($group_types = array(OA_SPACE_TYPE => OA_SPAC
  * @param  int $gid space ID
  * @return keyed array of section data: $array[$nid] = $title
  */
-function oa_core_space_sections($gid) {
+function oa_core_space_sections($gid, $status = NULL, $bypass_access_check = FALSE) {
   $query = db_select('node', 'n');
   $query->rightJoin('og_membership', 'og', 'n.nid = og.etid');
   $query->leftJoin('field_data_field_oa_section_weight', 'w',
         "n.nid = w.entity_id AND w.entity_type = 'node'");
+  if (isset($status)) {
+    $query->condition('n.status', $status);
+  }
   $query
     ->fields('n', array('nid', 'title'))
     ->condition('n.type', OA_SECTION_TYPE)
     ->condition('og.entity_type', 'node')
     ->condition('og.field_name', OA_SPACE_FIELD)
     ->condition('og.gid', $gid)
-    ->orderBy('w.field_oa_section_weight_value')
-    ->addTag('node_access');
+    ->orderBy('w.field_oa_section_weight_value');
+  if (!$bypass_access_check) {
+    $query->addTag('node_access');
+  }
   $result = $query->execute();
   return $result->fetchAllKeyed(0, 1);
 }
@@ -486,6 +512,13 @@ function oa_core_get_last_word($string) {
 }
 
 /**
+ * Return the name of a user
+ */
+function oa_core_realname($user) {
+  return !empty($user->realname) ? $user->realname : $user->name;
+}
+
+/**
  * Convert known entities in to a simple array of title and picture.
  */
 function oa_core_entity_build_display($entity, $id, $space) {
@@ -546,12 +579,28 @@ function oa_core_get_entity_vocabs($entity_type, $bundle) {
 }
 
 /**
+ * Returns the named vocabulary
+ * Cannot use core taxonomy_vocabulary_machine_name_load because og_vocab
+ * alters the query to only return vocabs associated with the current space
+ * see issue https://drupal.org/node/2270529
+ */
+function oa_core_taxonomy_vocabulary($machine_name) {
+  // EntityFieldQuery is not subject to the
+  // og_vocab_query_taxonomy_vocabulary_load_multiple_alter() function
+  $efq = new EntityFieldQuery();
+  $result = $efq->entityCondition('entity_type', 'taxonomy_vocabulary')
+    ->propertyCondition('machine_name', $machine_name)
+    ->execute();
+  return !empty($result['taxonomy_vocabulary']) ? current($result['taxonomy_vocabulary']) : NULL;
+}
+
+/**
  * Return terms for a list of vocabularies
  */
 function oa_core_get_vocab_terms($vocabs) {
   $options = array();
   foreach ($vocabs as $vocab) {
-    if ($vocabulary = taxonomy_vocabulary_machine_name_load($vocab)) {
+    if ($vocabulary = oa_core_taxonomy_vocabulary($vocab)) {
       if ($terms = taxonomy_get_tree($vocabulary->vid)) {
         foreach ($terms as $term) {
           $options[$term->tid] = str_repeat('-', $term->depth) . $term->name;
