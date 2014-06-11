@@ -10,8 +10,8 @@ if [ ! -z $OPENSHIFT_PRESSFLOW7_DIR ]; then
 fi
 
 # Set the apc.shm_size to 160 megabytes if it has not yet been sent.
-[[ -z $OPENSHIFT_PHP_APC_SHM_SIZE ]] && {
+if [[ -z $OPENSHIFT_PHP_APC_SHM_SIZE ]]; then
   echo "160M" > ~/.env/user_vars/OPENSHIFT_PHP_APC_SHM_SIZE
   gear stop php
   gear start php
-}
+fi
