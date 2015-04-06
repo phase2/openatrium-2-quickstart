@@ -19,5 +19,5 @@ git subtree pull --prefix php pressflow-drops master --squash
 ### Creating an app
 
 `rhc app-create openatrium php-5.3 mysql-5.1 cron \
-  https://cartreflect-claytondev.rhcloud.com/reflect?github=smerrill/openshift-community-pressflow7 \
-  --from-code=https://github.com/smerrill/openatrium-2-quickstart.git`
+  https://cartreflect-claytondev.rhcloud.com/reflect?github=smerrill/openshift-community-pressflow7 
+  --from-code https://github.com/phase2/openatrium-2-quickstart.git`
